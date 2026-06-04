@@ -3,7 +3,19 @@ const La = window.Loaner;
 const { useState, useEffect, useCallback } = React;
 const MAX_COMPARE = 4;
 
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return mobile;
+}
+
 function App() {
+  const isMobile = useIsMobile();
   const [scenarios, setScenarios] = useState(() => La.load());
   const [view, setView] = useState('list'); // list | edit | compare
   const [editingId, setEditingId] = useState(null);
@@ -97,42 +109,51 @@ function App() {
     setSelected([]); setCompareIds([]);
   };
 
+  const listProps = {
+    scenarios, selected, maxCompare: MAX_COMPARE,
+    onToggle: toggleSelect, onClearSel: () => setSelected([]),
+    onOpen: openEdit, onNew: newScenario,
+    onDuplicate: duplicateScenario, onDelete: deleteScenario,
+    onCompare: startCompare, onReset: resetSeed,
+  };
+  const editProps = {
+    scenario: byId(editingId),
+    onPatch: (partial) => patch(editingId, partial),
+    onBack: backToList,
+    onDuplicate: () => { const nid = duplicateScenario(editingId); if (nid) openEdit(nid); },
+  };
+  const compareScenarios = compareIds.map(byId).filter(Boolean);
+  const compareProps = {
+    scenarios: compareScenarios,
+    onBack: backToList,
+    onOpen: (id) => openEdit(id),
+    onRemove: removeFromCompare,
+  };
+
+  if (isMobile) {
+    let mobileBody;
+    if (view === 'edit' && byId(editingId)) {
+      mobileBody = <MEditView {...editProps} />;
+    } else if (view === 'compare' && compareScenarios.length >= 2) {
+      mobileBody = <MCompareView {...compareProps} />;
+    } else {
+      mobileBody = <MListView {...listProps} />;
+    }
+    return (
+      <div className="m-app">
+        {toast && <div className="toast">{toast}</div>}
+        <div className="m-screen">{mobileBody}</div>
+      </div>
+    );
+  }
+
   let body;
   if (view === 'edit' && byId(editingId)) {
-    body = (
-      <EditView
-        scenario={byId(editingId)}
-        onPatch={(partial) => patch(editingId, partial)}
-        onBack={backToList}
-        onDuplicate={() => { const nid = duplicateScenario(editingId); if (nid) openEdit(nid); }}
-      />
-    );
+    body = <EditView {...editProps} />;
   } else if (view === 'compare') {
-    const cs = compareIds.map(byId).filter(Boolean);
-    body = (
-      <CompareView
-        scenarios={cs}
-        onBack={backToList}
-        onOpen={(id) => openEdit(id)}
-        onRemove={removeFromCompare}
-      />
-    );
+    body = <CompareView {...compareProps} />;
   } else {
-    body = (
-      <ListView
-        scenarios={scenarios}
-        selected={selected}
-        maxCompare={MAX_COMPARE}
-        onToggle={toggleSelect}
-        onClearSel={() => setSelected([])}
-        onOpen={openEdit}
-        onNew={newScenario}
-        onDuplicate={duplicateScenario}
-        onDelete={deleteScenario}
-        onCompare={startCompare}
-        onReset={resetSeed}
-      />
-    );
+    body = <ListView {...listProps} />;
   }
 
   return (

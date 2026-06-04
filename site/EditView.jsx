@@ -316,3 +316,4 @@ function EditView({ scenario, onPatch, onBack, onDuplicate }) {
 }
 
 window.EditView = EditView;
+window.BuydownSection = BuydownSection;

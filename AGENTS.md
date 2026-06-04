@@ -31,11 +31,22 @@ Browser verification therefore requires internet access.
 - `site/ListView.jsx`: Scenario list with multi-select and the floating compare
   bar.
 - `site/EditView.jsx`: Full scenario editor with the buydown section and the
-  sticky summary rail.
+  sticky summary rail. Also exports `BuydownSection` for reuse in the mobile
+  editor.
 - `site/CompareView.jsx`: Side-by-side comparison table with best/worst
   highlighting.
 - `site/App.jsx`: Top-level React state, view routing, and localStorage
-  persistence.
+  persistence. Detects mobile via `matchMedia('(max-width: 767px)')` and renders
+  mobile views instead of desktop views.
+- `site/m-shared.jsx`: Mobile-only shared chrome — `MIcon`, `TabBar`,
+  `ListHead`, `SubHead`. Exports to `window`.
+- `site/MListView.jsx`: Mobile list — stacked cards, kebab action sheet
+  (Edit / Duplicate / Delete), select-to-compare mode.
+- `site/MEditView.jsx`: Mobile editor — single-column form, collapsible
+  sections, docked dark summary bar that expands into a full stats sheet.
+- `site/MCompareView.jsx`: Mobile compare — metric-led accordion (direction C
+  only). Each metric shows scenario values side-by-side with spread in the
+  header.
 - `infra/bin/loaner.ts`: CDK entry point and environment loading.
 - `infra/lib/loaner-site-stack.ts`: AWS resources and static-site deployment.
 - `scripts/deploy-site.sh`: Content-only AWS CLI deployment fast path.
