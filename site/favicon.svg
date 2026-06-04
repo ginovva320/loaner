@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- indigo rounded-square background -->
+  <rect width="32" height="32" rx="7" fill="#4f5bd5"/>
+  <!-- ◳ mark: square outline + filled upper-right quadrant, in white -->
+  <rect x="7" y="7" width="18" height="18" fill="none" stroke="white" stroke-width="2"/>
+  <rect x="16" y="7" width="9" height="9" fill="white"/>
+</svg>
