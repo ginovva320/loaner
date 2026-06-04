@@ -21,7 +21,9 @@ Browser verification therefore requires internet access.
 
 ## File Boundaries
 
-- `site/index.html`: CDN scripts and global CSS. Entry point.
+- `site/index.html`: CDN scripts, global CSS (the entire stylesheet is inline
+  here — add new styles to this file, not a separate CSS file), and entry point.
+- `site/favicon.svg`: SVG favicon — the ◳ mark on an indigo background.
 - `site/engine.js`: Pure calculations and seed data. Keep this DOM-free and
   testable from Node by stubbing `window`.
 - `site/components.jsx`: Shared UI primitives (Icon, Btn, Field, LineEditor,
@@ -43,6 +45,10 @@ Browser verification therefore requires internet access.
 
 - Keep the calculation engine (`engine.js`) independent from the UI.
 - Use existing UI primitives from `components.jsx` before adding one-off markup.
+- All CSS lives inline in `site/index.html`. Do not create a separate stylesheet.
+- If the scenario data model changes (fields added, renamed, or removed), bump
+  the storage key in `engine.js` from `loaner.scenarios.vN` to
+  `loaner.scenarios.vN+1` so stale localStorage data doesn't silently break.
 - Do not commit `.playwright-cli/`; it contains local browser-test artifacts.
 - Do not commit `.env`, `.site-dist/`, `node_modules/`, or `cdk.out/`.
 - Keep domain and hosted-zone values configurable through environment variables.
