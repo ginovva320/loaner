@@ -255,10 +255,73 @@
     return copy;
   }
 
+  // ---------- share link encoding ----------
+  const LINE_KEYS = ['lenderFees', 'thirdPartyCannotShop', 'thirdPartyCanShop', 'govFees', 'prepaids', 'escrows'];
+
+  async function _compress(str) {
+    const data = new TextEncoder().encode(str);
+    const cs = new CompressionStream('deflate-raw');
+    const w = cs.writable.getWriter();
+    w.write(data); w.close();
+    const chunks = []; const r = cs.readable.getReader(); let ch;
+    while (!(ch = await r.read()).done) chunks.push(ch.value);
+    const out = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+    let off = 0; for (const c of chunks) { out.set(c, off); off += c.length; }
+    return out;
+  }
+
+  async function _decompress(bytes) {
+    const ds = new DecompressionStream('deflate-raw');
+    const w = ds.writable.getWriter();
+    w.write(bytes); w.close();
+    const chunks = []; const r = ds.readable.getReader(); let ch;
+    while (!(ch = await r.read()).done) chunks.push(ch.value);
+    const out = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+    let off = 0; for (const c of chunks) { out.set(c, off); off += c.length; }
+    return new TextDecoder().decode(out);
+  }
+
+  function _b64url(bytes) {
+    let s = ''; bytes.forEach((b) => (s += String.fromCharCode(b)));
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  function _fromb64url(str) {
+    const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+    const bin = atob(padded); const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  async function encodeShare(scenarios) {
+    const stripped = scenarios.map((s) => {
+      const out = { ...s }; delete out.id;
+      LINE_KEYS.forEach((k) => {
+        if (Array.isArray(out[k])) out[k] = out[k].map(({ id, ...item }) => item);
+      });
+      return out;
+    });
+    return _b64url(await _compress(JSON.stringify(stripped)));
+  }
+
+  async function decodeShare(encoded) {
+    const json = await _decompress(_fromb64url(encoded));
+    const parsed = JSON.parse(json);
+    if (!Array.isArray(parsed) || !parsed.length) throw new Error('Invalid share data.');
+    const relabel = (arr) => (arr || []).map((l) => ({ ...l, id: uid() }));
+    return parsed.map((s) => {
+      const out = { ...s, id: uid() };
+      LINE_KEYS.forEach((k) => { if (Array.isArray(out[k])) out[k] = relabel(out[k]); });
+      return out;
+    });
+  }
+
   window.Loaner = {
     pmt, sum, computeDerived, lifetimeInterest,
     fmtMoney, fmtMoney0, fmtPct, fmtNum,
     uid, line, makeScenario, seedScenarios,
     load, save, resetSeed, duplicate,
+    encodeShare, decodeShare,
   };
 })();

@@ -23,6 +23,7 @@ function Icon({ name, size = 16 }) {
     down: <polyline points="6 10 12 16 18 10" />,
     reset: <><path d="M4 12a8 8 0 1 0 2.3-5.6" /><polyline points="4 4 4 8 8 8" /></>,
     note: <><path d="M5 4h11l3 3v13H5z" /><path d="M16 4v4h4" /><line x1="8" y1="12" x2="15" y2="12" /><line x1="8" y1="16" x2="13" y2="16" /></>,
+    upload: <><line x1="5" y1="21" x2="19" y2="21" /><line x1="12" y1="19" x2="12" y2="11" /><polyline points="8 11 12 7 16 11" /></>,
   };
   return <svg {...p} className="icn">{paths[name] || null}</svg>;
 }

@@ -53,6 +53,18 @@ function ScenarioRow({ s, selected, selectable, onToggle, onOpen, onDuplicate, o
 function ListView({ scenarios, selected, maxCompare, onToggle, onClearSel, onOpen, onNew, onDuplicate, onDelete, onCompare, onReset }) {
   const selectable = selected.length < maxCompare;
   const atCap = selected.length >= maxCompare;
+  const [copyFlash, setCopyFlash] = useState(false);
+
+  const handleShare = async () => {
+    try {
+      const encoded = await Lp.encodeShare(scenarios);
+      const url = `${window.location.origin}${window.location.pathname}#s=${encoded}`;
+      await navigator.clipboard.writeText(url);
+      setCopyFlash(true);
+      setTimeout(() => setCopyFlash(false), 1500);
+    } catch (e) {}
+  };
+
   return (
     <div className="list-view">
       <div className="list-head">
@@ -61,6 +73,7 @@ function ListView({ scenarios, selected, maxCompare, onToggle, onClearSel, onOpe
           <span className="count-pill">{scenarios.length}</span>
         </div>
         <div className="lh-right">
+          <Btn kind="ghost" icon="upload" onClick={handleShare}>{copyFlash ? 'Copied!' : 'Share link'}</Btn>
           <Btn kind="ghost" icon="reset" onClick={onReset}>Reset to examples</Btn>
           <Btn kind="solid" icon="plus" onClick={onNew}>New scenario</Btn>
         </div>

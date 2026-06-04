@@ -9,8 +9,25 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [selected, setSelected] = useState([]);
   const [compareIds, setCompareIds] = useState([]);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => { La.save(scenarios); }, [scenarios]);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash.startsWith('#s=')) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    La.decodeShare(hash.slice(3)).then((imported) => {
+      setScenarios((prev) => {
+        const merged = [...prev, ...imported];
+        La.save(merged);
+        return merged;
+      });
+      const n = imported.length;
+      setToast(`${n} scenario${n !== 1 ? 's' : ''} imported`);
+      setTimeout(() => setToast(null), 3000);
+    }).catch(() => {});
+  }, []);
 
   const byId = (id) => scenarios.find((s) => s.id === id);
 
@@ -118,6 +135,7 @@ function App() {
 
   return (
     <div className="app">
+      {toast && <div className="toast">{toast}</div>}
       <header className="appbar">
         <div className="brand" onClick={backToList} role="button">
           <span className="logo">◳</span>
