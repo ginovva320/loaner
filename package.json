@@ -1,0 +1,26 @@
+{
+  "name": "loaner-mortgage-scenarios",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "npx serve site -p 3000",
+    "build:site": "node scripts/render-site.mjs",
+    "typecheck": "tsc --noEmit",
+    "synth": "npm run build:site && cdk synth",
+    "diff": "npm run build:site && cdk diff",
+    "deploy": "npm run build:site && cdk deploy",
+    "deploy:site": "./scripts/deploy-site.sh",
+    "destroy": "cdk destroy"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.214.0",
+    "constructs": "^10.4.2",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "aws-cdk": "^2.1029.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
