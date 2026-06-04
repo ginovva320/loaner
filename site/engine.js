@@ -296,7 +296,7 @@
 
   async function encodeShare(scenarios) {
     const stripped = scenarios.map((s) => {
-      const out = { ...s }; delete out.id;
+      const out = { ...s };
       LINE_KEYS.forEach((k) => {
         if (Array.isArray(out[k])) out[k] = out[k].map(({ id, ...item }) => item);
       });
@@ -311,7 +311,7 @@
     if (!Array.isArray(parsed) || !parsed.length) throw new Error('Invalid share data.');
     const relabel = (arr) => (arr || []).map((l) => ({ ...l, id: uid() }));
     return parsed.map((s) => {
-      const out = { ...s, id: uid() };
+      const out = { ...s, id: s.id || uid() };
       LINE_KEYS.forEach((k) => { if (Array.isArray(out[k])) out[k] = relabel(out[k]); });
       return out;
     });

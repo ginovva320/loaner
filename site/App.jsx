@@ -19,7 +19,9 @@ function App() {
     window.history.replaceState(null, '', window.location.pathname);
     La.decodeShare(hash.slice(3)).then((imported) => {
       setScenarios((prev) => {
-        const merged = [...prev, ...imported];
+        const importedIds = new Set(imported.map((s) => s.id));
+        const kept = prev.filter((s) => !importedIds.has(s.id));
+        const merged = [...kept, ...imported];
         La.save(merged);
         return merged;
       });
